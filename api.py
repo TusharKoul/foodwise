@@ -1,10 +1,14 @@
 import os
 
-from flask import Flask, render_template, request, redirect, url_for, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, send_from_directory, session
 from werkzeug import secure_filename
+
+from splitwise import Splitwise
+import config
 
 # Initialize the Flask application
 app = Flask(__name__)
+app.secret_key = "test_secret_key"
 urls = []
 
 # This is the path to the upload directory
@@ -46,6 +50,25 @@ def upload():
                                 filename=filename))
     return "Uploaded"
 
+# Route that will handle splitwise account of user
+@app.route('/split')
+def split_bill():
+    # secret key from config file
+    sObj = Splitwise(config.ckey, config.csecret)
+    # authorization URL to redirect to
+    url, secret = sObj.getAuthorizeURL()
+    session['secret'] = secret
+    return redirect(url)
+
+@app.route('/authorize')
+def authorize():
+    oauth_token = request.args.get('oauth_token')
+    oauth_verifier = request.args.get('oauth_verifier')
+    sObj = Splitwise(config.ckey, config.csecret)
+    # get access to user account to make changes
+    access_token = sObj.getAccessToken(oauth_token,session['secret'],oauth_verifier)
+    # TODO
+    return "Done"
 
 if __name__ == '__main__':
     app.run()
