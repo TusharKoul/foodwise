@@ -11,7 +11,7 @@ from werkzeug import secure_filename
 app = Flask(__name__)
 
 # This is the path to the upload directory
-app.config['UPLOAD_FOLDER'] = '~/photos/'
+app.config['UPLOAD_FOLDER'] = '/Users/swathi/photos/'
 # These are the extension that we are accepting to be uploaded
 app.config['ALLOWED_EXTENSIONS'] = set(['png', 'jpg', 'jpeg', 'gif'])
 
@@ -32,19 +32,24 @@ def index():
 @app.route('/upload', methods=['POST'])
 def upload():
     # Get the name of the uploaded file
-    file = request.files['file']
-    # Check if the file is one of the allowed types/extensions
-    if file and allowed_file(file.filename):
-        # Make the filename safe, remove unsupported chars
-        filename = secure_filename(file.filename)
-        # Move the file form the temporal folder to
-        # the upload folder we setup
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        # Redirect the user to the uploaded_file route, which
-        # will basicaly show on the browser the uploaded file
-        return redirect(url_for('uploaded_file',
+    files = request.files.getlist('file[]')
+    print files
+    urls = []
+    for file in files:
+        # Check if the file is one of the allowed types/extensions
+        if file and allowed_file(file.filename):
+            # Make the filename safe, remove unsupported chars
+            filename = secure_filename(file.filename)
+            print filename
+            # Move the file form the temporal folder to
+            # the upload folder we setup
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            # Redirect the user to the uploaded_file route, which
+            # will basicaly show on the browser the uploaded file
+            urls.append(url_for('uploaded_file',
                                 filename=filename))
-
+    print urls
+    return "Uploaded"
 # This route is expecting a parameter containing the name
 # of a file. Then it will locate that file on the upload
 # directory and show it on the browser, so if the user uploads
