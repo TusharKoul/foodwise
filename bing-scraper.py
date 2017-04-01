@@ -149,9 +149,14 @@ def getMenu(restaurantName):
 
 # In[110]:
 
-menu = {}
-getMenu('il Tramezzino menu')
 
+# restaurants that you can try
+# - ghirardelli chocolate company
+# - palomino
+# - il Tramezzino
+# - oxnard coffee shop
+menu = {}
+getMenu('il Tramezzino')
 
 # In[112]:
 
