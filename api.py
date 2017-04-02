@@ -100,6 +100,7 @@ def split_bill():
 
     sObj = Splitwise(config.ckey, config.csecret)
     url, secret = sObj.getAuthorizeURL()
+    print url
     session['secret'] = secret
     return url
 
