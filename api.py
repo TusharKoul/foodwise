@@ -17,7 +17,7 @@ clarifai_descpt = {}
 #urls = []
 
 # This is the path to the upload directory
-app.config['UPLOAD_FOLDER'] = '/Users/swathi/photos/'
+app.config['UPLOAD_FOLDER'] = '/home/foodwise/photos/'
 # These are the extension that we are accepting to be uploaded
 app.config['ALLOWED_EXTENSIONS'] = set(['png', 'jpg', 'jpeg', 'gif'])
 
@@ -46,7 +46,6 @@ def upload():
         if file and allowed_file(file.filename):
             # Make the filename safe, remove unsupported chars
             filename = secure_filename(file.filename)
-            print(filename)
             # Move the file form the temporal folder to
             # the upload folder we setup
             fname = os.path.join(app.config['UPLOAD_FOLDER'], filename)
@@ -71,7 +70,6 @@ def metadata():
     tod = request.form["tod"]
     menu = bs.getMenu(metadata["title"])
     metadata["amount"] = pm.process(menu, clarifai_descpt, tod)
-    print(metadata)
     requests.post("http://localhost:5000/split", data=json.dumps(metadata))
     return "Done"
 
