@@ -3,11 +3,10 @@ from clarifai.rest import ClarifaiApp
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory, session
 from werkzeug import secure_filename
 from splitwise import Splitwise
-import config
+#import config
 import bing_scraper as bs
 import process_menu as pm
 import requests
-import json
 
 # Initialize the Flask application
 app = Flask(__name__)
@@ -17,7 +16,7 @@ clarifai_descpt = {}
 #urls = []
 
 # This is the path to the upload directory
-app.config['UPLOAD_FOLDER'] = '/home/foodwise/photos/'
+app.config['UPLOAD_FOLDER'] = '/Users/swathi/photos/'
 # These are the extension that we are accepting to be uploaded
 app.config['ALLOWED_EXTENSIONS'] = set(['png', 'jpg', 'jpeg', 'gif'])
 
@@ -70,13 +69,8 @@ def metadata():
     tod = request.form["tod"]
     menu = bs.getMenu(metadata["title"])
     metadata["amount"] = pm.process(menu, clarifai_descpt, tod)
-    requests.post("http://localhost:5000/split", data=json.dumps(metadata))
     return "Done"
 
-@app.route("/split", methods=["POST"])
-def split():
-    print("In split")
-    return "Done"
 
 if __name__ == '__main__':
     app.run()
