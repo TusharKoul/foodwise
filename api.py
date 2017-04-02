@@ -18,8 +18,7 @@ clarifai_descpt = {}
 #urls = []
 
 # This is the path to the upload directory
-app.config['UPLOAD_FOLDER'] = '/home/foodwise/photos/'
-app.config['UPLOAD_FOLDER'] = '/Users/swathi/photos/'
+app.config['UPLOAD_FOLDER'] = '/tmp/'
 # These are the extension that we are accepting to be uploaded
 app.config['ALLOWED_EXTENSIONS'] = set(['png', 'jpg', 'jpeg', 'gif'])
 
