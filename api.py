@@ -3,13 +3,9 @@ from clarifai.rest import ClarifaiApp
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory, session
 from werkzeug import secure_filename
 from splitwise import Splitwise
-<<<<<<< HEAD
 from splitwise.expense import Expense
 from splitwise.user import ExpenseUser, CurrentUser
 import config
-=======
-#import config
->>>>>>> 76cbe5385779e228d76d0b894ff6f5d37bd1ff18
 import bing_scraper as bs
 import process_menu as pm
 import requests
@@ -77,7 +73,7 @@ def metadata():
     metadata["email_ids"] = request.form["emails"].split(",")
     tod = request.form["tod"]
     menu = bs.getMenu(metadata["title"])
-    metadata["amount"] = pm.process(menu, clarifai_descpt, tod)
+    metadata["amount"], metadata["priceDist"] = pm.process(menu, clarifai_descpt, tod)
     reply = metadata
     print reply, type(reply)
     names = reply['people']
@@ -85,6 +81,7 @@ def metadata():
     session['title'] = reply['title']
     session['people'] = []
     session['amount'] = metadata['amount']
+    session['priceDist'] = metadata['priceDist']
     for i in range(len(names)):
         session['people'].append({'name':names[i], 'email':emails[i]})
     print session
@@ -175,8 +172,7 @@ def usage():
     try:
         expense = sObj.createExpense(expense)
         print expense.getId()
-        session.clear()
-        return 'Done'
+        return session
     except Exception, e:
         return 'error'
 

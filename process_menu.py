@@ -1,4 +1,5 @@
 def process(menu, clarifai_descpt, tod):
+	price_dist = {}
 	total = 0
 	for key, value in clarifai_descpt.items():
 		key_match = {}
@@ -17,4 +18,5 @@ def process(menu, clarifai_descpt, tod):
 		while not menu[sorted_key_match[j][0]].price:
 			j += 1
 		total += float(menu[sorted_key_match[j][0]].price.split("$")[-1])
-	return total
+		price_dist[menu[sorted_key_match[j][0]].key] = menu[sorted_key_match[j][0]].price
+	return total, price_dist
