@@ -1,0 +1,18 @@
+PODS:
+  - Alamofire (4.4.0)
+  - ImagePicker (2.1.0)
+  - SwiftSpinner (1.2.0)
+
+DEPENDENCIES:
+  - Alamofire (~> 4.4)
+  - ImagePicker
+  - SwiftSpinner
+
+SPEC CHECKSUMS:
+  Alamofire: dc44b1600b800eb63da6a19039a0083d62a6a62d
+  ImagePicker: c0dd40026df3039ddd4b6f61433a96224d56d63b
+  SwiftSpinner: 6892642232471da581ecb020a9150e07d17a954b
+
+PODFILE CHECKSUM: f7b12403d38732a5a21f739e42e58c1dbaba6da8
+
+COCOAPODS: 1.2.0
