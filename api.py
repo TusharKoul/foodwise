@@ -101,7 +101,7 @@ def split_bill():
     sObj = Splitwise(config.ckey, config.csecret)
     url, secret = sObj.getAuthorizeURL()
     session['secret'] = secret
-    return redirect(url)
+    return url
 
 @app.route('/authorize')
 def authorize():
