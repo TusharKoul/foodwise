@@ -73,6 +73,7 @@ def metadata():
     location= request.form["location"]
     metadata["email_ids"] = request.form.getlist("emails[]")
     tod = request.form["tod"]
+    print metadata
     menu = bs.getMenu(metadata["title"])
     print menu
     print clarifai_descpt
