@@ -66,19 +66,19 @@ def upload():
 @app.route("/metadata", methods=["POST"])
 def metadata():
     metadata = {}
-    # print request
-    # print request.form
+    print request
+    print request.form
     metadata["title"] = request.form["restaurantName"]
     metadata["people"] = request.form.getlist("people[]")
     location= request.form["location"]
     metadata["email_ids"] = request.form.getlist("emails[]")
     tod = request.form["tod"]
     menu = bs.getMenu(metadata["title"])
-    # print menu
+    print menu
     metadata["amount"], metadata["priceDist"] = pm.process(menu, clarifai_descpt, tod)
-    # print metadata
+    print metadata
     reply = metadata
-    # print reply, type(reply)
+    print reply, type(reply)
     names = reply['people']
     emails = reply['email_ids']
     session['title'] = reply['title']
