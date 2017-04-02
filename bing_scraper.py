@@ -5,7 +5,7 @@
 
 from bs4 import BeautifulSoup
 from bs4 import Comment
-import urllib.request
+from six.moves import urllib
 
 
 # In[65]:
@@ -157,7 +157,7 @@ def getMenu(restaurantName):
 # - il Tramezzino
 # - oxnard coffee shop
 #menu = {}
-#print(getMenu('il Tramezzino'))
+# print(getMenu('il Tramezzino'))
 
 # In[112]:
 
