@@ -74,7 +74,9 @@ def metadata():
     metadata["email_ids"] = request.form.getlist("emails[]")
     tod = request.form["tod"]
     menu = bs.getMenu(metadata["title"])
+    print menu
     metadata["amount"], metadata["priceDist"] = pm.process(menu, clarifai_descpt, tod)
+    print metadata
     reply = metadata
     print reply, type(reply)
     names = reply['people']
