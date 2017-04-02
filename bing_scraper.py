@@ -6,6 +6,7 @@
 from bs4 import BeautifulSoup
 from bs4 import Comment
 from six.moves import urllib
+# import urllib.request
 
 
 # In[65]:
@@ -141,8 +142,7 @@ def getItemDesc(item):
 # In[109]:
 
 def getMenu(restaurantName):
-    html = loadInitialMenu('il Tramezzino menu')
-
+    html = loadInitialMenu(restaurantName)
     menuHtml = parseInitialMenu(html)
     menuHeaders = parseMenuGroups(menuHtml)
     menu = parseMenuItems(menuHtml, menuHeaders, isInitial=True)
@@ -157,7 +157,7 @@ def getMenu(restaurantName):
 # - il Tramezzino
 # - oxnard coffee shop
 #menu = {}
-# print(getMenu('il Tramezzino'))
+#print(getMenu('il Tramezzino'))
 
 # In[112]:
 
