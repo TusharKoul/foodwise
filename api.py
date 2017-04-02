@@ -75,6 +75,7 @@ def metadata():
     tod = request.form["tod"]
     menu = bs.getMenu(metadata["title"])
     print menu
+    print clarifai_descpt
     metadata["amount"], metadata["priceDist"] = pm.process(menu, clarifai_descpt, tod)
     print metadata
     reply = metadata
