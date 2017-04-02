@@ -3,6 +3,8 @@ from clarifai.rest import ClarifaiApp
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory, session
 from werkzeug import secure_filename
 from splitwise import Splitwise
+from splitwise.expense import Expense
+from splitwise.user import ExpenseUser, CurrentUser
 import config
 import bing_scraper as bs
 import process_menu as pm
@@ -17,7 +19,8 @@ clarifai_descpt = {}
 #urls = []
 
 # This is the path to the upload directory
-app.config['UPLOAD_FOLDER'] = '/home/foodwise/photos/'
+# app.config['UPLOAD_FOLDER'] = '/home/foodwise/photos/'
+app.config['UPLOAD_FOLDER'] = './'
 # These are the extension that we are accepting to be uploaded
 app.config['ALLOWED_EXTENSIONS'] = set(['png', 'jpg', 'jpeg', 'gif'])
 
@@ -37,6 +40,8 @@ def index():
 # Route that will process the file upload
 @app.route('/upload', methods=['POST'])
 def upload():
+    session.clear()
+    print session
     # Get the name of the uploaded file
     files = request.files.getlist('file[]')
     urls = []
@@ -64,19 +69,114 @@ def upload():
 def metadata():
     metadata = {}
     metadata["title"] = request.form["restaurantName"]
-    metadata["people"] = request.form["people"].split(", ")
+    metadata["people"] = request.form["people"].split(",")
     location= request.form["location"]
     metadata["email_ids"] = request.form["emails"].split(",")
     tod = request.form["tod"]
     menu = bs.getMenu(metadata["title"])
     metadata["amount"] = pm.process(menu, clarifai_descpt, tod)
-    requests.post("http://localhost:5000/split", data=json.dumps(metadata))
-    return "Done"
+    # requests.post("http://localhost:5000/split", data=json.dumps(metadata))
+    reply = metadata
+    print reply, type(reply)
+    names = reply['people']
+    emails = reply['email_ids']
+    session['title'] = reply['title']
+    session['people'] = []
+    session['amount'] = metadata['amount']
+    for i in range(len(names)):
+        session['people'].append({'name':names[i], 'email':emails[i]})
+    print session
+    return redirect('/split')
 
-@app.route("/split", methods=["POST"])
-def split():
-    print("In split")
-    return "Done"
+@app.route('/split')
+def split_bill():
+
+    # next 3 lines to be commented before deployment with UI   
+    session['title'] = 'TITLE'
+    session['people'] = [{'name':'Shreyas','email':'udupa_shreyas@yahoo.co.in'}, {'name':'Mridul','email':'g'}]
+    session['amount'] = '21.9'
+
+    sObj = Splitwise(config.ckey, config.csecret)
+    url, secret = sObj.getAuthorizeURL()
+    session['secret'] = secret
+    return redirect(url)
+
+@app.route('/authorize')
+def authorize():
+    oauth_token = request.args.get('oauth_token')
+    oauth_verifier = request.args.get('oauth_verifier')
+    sObj = Splitwise(config.ckey, config.csecret)
+    access_token = sObj.getAccessToken(oauth_token,session['secret'],oauth_verifier)
+    session['access_token'] = access_token
+    return redirect('/with_friends')
+
+@app.route('/with_friends')
+def usage():
+    print session
+    sObj = Splitwise(config.ckey,config.csecret)
+    sObj.setAccessToken(session['access_token'])
+    me = sObj.getCurrentUser()
+    friends = sObj.getFriends()
+
+    # add people in group to friends list on Splitwise
+    friendnames = []
+
+    for f in friends:
+        friendnames.append(f['first_name'])
+
+    tbanames = []
+    tbaemails = []
+    allnames = []
+    for f in session['people']:
+        allnames.append(f['name'])
+        if f['name'] not in friendnames:
+            tbanames.append(f['name'])
+            tbaemails.append(f['email'])
+    sObj.createFriends(tbanames,tbaemails)
+
+    # create expense
+    expense = Expense()
+    expense.setCost(session['amount'])
+    expense.setDescription(session['title'])
+
+    friends = sObj.getFriends()
+
+    # equal share
+    total = float(session['amount'])
+    num_people = len(session['people']) + 1
+    share = total/num_people
+    share = float("{0:.2f}".format(share))
+
+    user1 = ExpenseUser()
+    user1.setId(me.getId())
+    user1.setPaidShare(str(total))
+    if (share * num_people) < total:
+        owed = share + (total - (share*num_people))
+    else:
+        owed = share
+    user1.setOwedShare(str(owed))
+
+    users = [user1]
+
+    print allnames
+
+    for f in friends:
+        if f['first_name'] in allnames:
+            print f['first_name']
+            user1 = ExpenseUser()
+            user1.setId(f['id'])
+            user1.setPaidShare('0.00')
+            user1.setOwedShare(str(total / num_people))
+            users.append(user1)
+    expense.setUsers(users)
+
+    try:
+        expense = sObj.createExpense(expense)
+        print expense.getId()
+        session.clear()
+        return 'Done'
+    except Exception, e:
+        return 'error'
 
 if __name__ == '__main__':
     app.run()
