@@ -69,9 +69,9 @@ def metadata():
     print request
     print request.form
     metadata["title"] = request.form["restaurantName"]
-    metadata["people"] = request.form["people"].split(",")
+    metadata["people"] = request.form.getlist("people[]")
     location= request.form["location"]
-    metadata["email_ids"] = request.form["emails"].split(",")
+    metadata["email_ids"] = request.form.getlist("emails[]")
     tod = request.form["tod"]
     menu = bs.getMenu(metadata["title"])
     metadata["amount"], metadata["priceDist"] = pm.process(menu, clarifai_descpt, tod)
@@ -92,9 +92,9 @@ def metadata():
 def split_bill():
 
     # next 3 lines to be commented before deployment with UI   
-    session['title'] = 'TITLE'
-    session['people'] = [{'name':'Shreyas','email':'udupa_shreyas@yahoo.co.in'}, {'name':'Mridul','email':'g'}]
-    session['amount'] = '21.9'
+    # session['title'] = 'TITLE'
+    # session['people'] = [{'name':'Shreyas','email':'udupa_shreyas@yahoo.co.in'}, {'name':'Mridul','email':'g'}]
+    # session['amount'] = '21.9'
 
     sObj = Splitwise(config.ckey, config.csecret)
     url, secret = sObj.getAuthorizeURL()
