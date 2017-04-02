@@ -157,7 +157,7 @@ def getMenu(restaurantName):
 # - il Tramezzino
 # - oxnard coffee shop
 #menu = {}
-# print(getMenu('il Tramezzino'))
+# print(getMenu('il Tramezzin o'))
 
 # In[112]:
 

@@ -88,7 +88,7 @@ def metadata():
     for i in range(len(names)):
         session['people'].append({'name':names[i], 'email':emails[i]})
     print session
-    return redirect('//split')
+    return redirect('/split')
 
 @app.route('/split')
 def split_bill():
