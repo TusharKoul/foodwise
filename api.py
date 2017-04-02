@@ -73,10 +73,10 @@ def metadata():
     location= request.form["location"]
     metadata["email_ids"] = request.form.getlist("emails[]")
     tod = request.form["tod"]
-    print metadata
+    print "metadata before", metadata
     menu = bs.getMenu(metadata["title"])
     metadata["amount"], metadata["priceDist"] = pm.process(menu, clarifai_descpt, tod)
-    print metadata
+    print "metadata after", metadata
     reply = metadata
     print reply, type(reply)
     names = reply['people']
