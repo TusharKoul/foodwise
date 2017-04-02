@@ -49,8 +49,8 @@ def parseMenuGroups(menuHtml):
     menuHeaders = menuHeaders.find_all('li')
     return [item.text for item in menuHeaders]
 
-menu = {}
 def parseMenuItems(menuHtml,menuHeaders,isInitial):
+    menu = {}
     if isInitial:
         startIndex = 0
         menuContent  = menuHtml.find("div", class_="tab-content")
@@ -76,6 +76,7 @@ def parseMenuItems(menuHtml,menuHeaders,isInitial):
                 foodItem = menu[name]
                 if menuGroup not in foodItem.menuGroup:
                     foodItem.menuGroup.append(menuGroup)
+    return menu
 
 
 # In[68]:
@@ -103,7 +104,7 @@ def loadAdditionalMenu(html):
     if restid  is '':
         return
     tabCount = getTabCount(html)
-    url = 'https://www.bing.com/local/menu?tabCount=' + str(tabCount)           + '&tabStart=6&othersTab=0&ypid='+ restid
+    url = 'http://www.bing.com/local/menu?tabCount=' + str(tabCount) + '&tabStart=6&othersTab=0&ypid='+ restid
     response = urllib.request.urlopen(url)
     return response.read()
 
@@ -141,12 +142,12 @@ def getItemDesc(item):
 
 def getMenu(restaurantName):
     html = loadInitialMenu('il Tramezzino menu')
+
     menuHtml = parseInitialMenu(html)
     menuHeaders = parseMenuGroups(menuHtml)
-    parseMenuItems(menuHtml, menuHeaders, isInitial=True)
+    menu = parseMenuItems(menuHtml, menuHeaders, isInitial=True)
     parseAdditionalMenu(html,menuHeaders)
-
-
+    return menu
 # In[110]:
 
 
@@ -155,8 +156,8 @@ def getMenu(restaurantName):
 # - palomino
 # - il Tramezzino
 # - oxnard coffee shop
-menu = {}
-getMenu('il Tramezzino')
+#menu = {}
+#print(getMenu('il Tramezzino'))
 
 # In[112]:
 

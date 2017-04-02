@@ -4,11 +4,15 @@ from flask import Flask, render_template, request, redirect, url_for, send_from_
 from werkzeug import secure_filename
 from splitwise import Splitwise
 import config
+import bing_scraper as bs
+import process_menu as pm
+import requests
+import json
 
 # Initialize the Flask application
 app = Flask(__name__)
 app.secret_key = "test_secret_key"
-clarifai_url = {}
+clarifai_descpt = {}
 
 #urls = []
 
@@ -42,7 +46,7 @@ def upload():
         if file and allowed_file(file.filename):
             # Make the filename safe, remove unsupported chars
             filename = secure_filename(file.filename)
-            print filename
+            print(filename)
             # Move the file form the temporal folder to
             # the upload folder we setup
             fname = os.path.join(app.config['UPLOAD_FOLDER'], filename)
@@ -54,28 +58,26 @@ def upload():
     for image_url in urls:
         output = clarifai_app.tag_files([image_url], model='food-items-v1.0')
         guesses = [op["name"] for op in sorted(output['outputs'][0]['data']['concepts'], key=lambda x: x["value"], reverse=True)][:10]
-        clarifai_url[image_url] = guesses
-    print clarifai_url
+        clarifai_descpt[image_url] = guesses
     return "Uploaded"
 
-# Route that will handle splitwise account of user
-@app.route('/split')
-def split_bill():
-    # secret key from config file
-    sObj = Splitwise(config.ckey, config.csecret)
-    # authorization URL to redirect to
-    url, secret = sObj.getAuthorizeURL()
-    session['secret'] = secret
-    return redirect(url)
+@app.route("/metadata", methods=["POST"])
+def metadata():
+    metadata = {}
+    metadata["title"] = request.form["restaurantName"]
+    metadata["people"] = request.form["people"].split(", ")
+    location= request.form["location"]
+    metadata["email_ids"] = request.form["emails"].split(",")
+    tod = request.form["tod"]
+    menu = bs.getMenu(metadata["title"])
+    metadata["amount"] = pm.process(menu, clarifai_descpt, tod)
+    print(metadata)
+    requests.post("http://localhost:5000/split", data=json.dumps(metadata))
+    return "Done"
 
-@app.route('/authorize')
-def authorize():
-    oauth_token = request.args.get('oauth_token')
-    oauth_verifier = request.args.get('oauth_verifier')
-    sObj = Splitwise(config.ckey, config.csecret)
-    # get access to user account to make changes
-    access_token = sObj.getAccessToken(oauth_token,session['secret'],oauth_verifier)
-    # TODO
+@app.route("/split", methods=["POST"])
+def split():
+    print("In split")
     return "Done"
 
 if __name__ == '__main__':
