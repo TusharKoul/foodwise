@@ -43,7 +43,7 @@ def upload():
     # Get the name of the uploaded file
     files = request.files.getlist('file[]')
     urls = []
-    clarifai_app = ClarifaiApp()
+    clarifai_app = ClarifaiApp(app_id='Lo1-3OPriyWss221gHySMX_ZdZFxer6nQe3BeQBz', app_secret='beN70gnQlx9oHiYwjqcFnlbhjStP63LlZaYUWQV7')
     for file in files:
         # Check if the file is one of the allowed types/extensions
         if file and allowed_file(file.filename):
