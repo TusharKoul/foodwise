@@ -66,6 +66,8 @@ def upload():
 @app.route("/metadata", methods=["POST"])
 def metadata():
     metadata = {}
+    print request
+    print request.form
     metadata["title"] = request.form["restaurantName"]
     metadata["people"] = request.form["people"].split(",")
     location= request.form["location"]
@@ -167,6 +169,8 @@ def usage():
             user1.setOwedShare(str(total / num_people))
             users.append(user1)
     expense.setUsers(users)
+
+    clarifai_descpt = {}
 
     try:
         expense = sObj.createExpense(expense)
