@@ -66,19 +66,19 @@ def upload():
 @app.route("/metadata", methods=["POST"])
 def metadata():
     metadata = {}
-    print request
-    print request.form
+    #print request
+    #print request.form
     metadata["title"] = request.form["restaurantName"]
     metadata["people"] = request.form.getlist("people[]")
     location= request.form["location"]
     metadata["email_ids"] = request.form.getlist("emails[]")
     tod = request.form["tod"]
-    print "metadata before", metadata
+    #print "metadata before", metadata
     menu = bs.getMenu(metadata["title"])
     metadata["amount"], metadata["priceDist"] = pm.process(menu, clarifai_descpt, tod)
-    print "metadata after", metadata
+    #print "metadata after", metadata
     reply = metadata
-    print reply, type(reply)
+    #print reply, type(reply)
     names = reply['people']
     emails = reply['email_ids']
     session['title'] = reply['title']
@@ -87,7 +87,7 @@ def metadata():
     session['priceDist'] = metadata['priceDist']
     for i in range(len(names)):
         session['people'].append({'name':names[i], 'email':emails[i]})
-    print session
+    #print session
     return redirect('/split')
 
 @app.route('/split')
@@ -101,7 +101,7 @@ def split_bill():
     sObj = Splitwise(config.ckey, config.csecret)
     url, secret = sObj.getAuthorizeURL()
     session['secret'] = secret
-    return url
+    return redirect(url)
 
 @app.route('/authorize')
 def authorize():
