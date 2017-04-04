@@ -18,7 +18,7 @@ clarifai_descpt = {}
 #urls = []
 
 # This is the path to the upload directory
-app.config['UPLOAD_FOLDER'] = '/tmp/'
+app.config['UPLOAD_FOLDER'] = './' #'/tmp/'
 # These are the extension that we are accepting to be uploaded
 app.config['ALLOWED_EXTENSIONS'] = set(['png', 'jpg', 'jpeg', 'gif'])
 
@@ -32,16 +32,17 @@ def allowed_file(filename):
 # value of the operation
 @app.route('/')
 def index():
-    return "Hello"
-
+    # return "Hello"
+    return render_template('hello.html')
 
 # Route that will process the file upload
 @app.route('/upload', methods=['POST'])
 def upload():
     session.clear()
     print session
+    print request
     # Get the name of the uploaded file
-    files = request.files.getlist('file[]')
+    files = [request.files['file[]']]
     urls = []
     clarifai_app = ClarifaiApp(app_id='Lo1-3OPriyWss221gHySMX_ZdZFxer6nQe3BeQBz', app_secret='beN70gnQlx9oHiYwjqcFnlbhjStP63LlZaYUWQV7')
     for file in files:
@@ -61,33 +62,31 @@ def upload():
         output = clarifai_app.tag_files([image_url], model='food-items-v1.0')
         guesses = [op["name"] for op in sorted(output['outputs'][0]['data']['concepts'], key=lambda x: x["value"], reverse=True)][:10]
         clarifai_descpt[image_url] = guesses
-    return "Uploaded"
+    print guesses
+    # return "Uploaded"
+    return render_template('detail.html')
 
 @app.route("/metadata", methods=["POST"])
 def metadata():
     metadata = {}
-    #print request
-    #print request.form
     metadata["title"] = request.form["restaurantName"]
-    metadata["people"] = request.form.getlist("people[]")
+    metadata["people"] = request.form["people"]
     location= request.form["location"]
-    metadata["email_ids"] = request.form.getlist("emails[]")
+    metadata["email_ids"] = request.form["emails"]
     tod = request.form["tod"]
-    #print "metadata before", metadata
     menu = bs.getMenu(metadata["title"])
     metadata["amount"], metadata["priceDist"] = pm.process(menu, clarifai_descpt, tod)
-    #print "metadata after", metadata
     reply = metadata
-    #print reply, type(reply)
-    names = reply['people']
-    emails = reply['email_ids']
+    names = reply['people'].split(',')
+    emails = reply['email_ids'].split(',')
     session['title'] = reply['title']
     session['people'] = []
     session['amount'] = metadata['amount']
     session['priceDist'] = metadata['priceDist']
+    print names
     for i in range(len(names)):
         session['people'].append({'name':names[i], 'email':emails[i]})
-    #print session
+    print session
     return redirect('/split')
 
 @app.route('/split')
@@ -102,10 +101,7 @@ def split_bill():
     return_obj = {}
     url, secret = sObj.getAuthorizeURL()
     session['secret'] = secret
-    return_obj["url"] = url
-    return_obj["session"] = session
-    #return redirect(url)
-    return return_obj
+    return redirect(url)
 
 
 @app.route('/authorize')
@@ -113,6 +109,9 @@ def authorize():
     oauth_token = request.args.get('oauth_token')
     oauth_verifier = request.args.get('oauth_verifier')
     sObj = Splitwise(config.ckey, config.csecret)
+    # if 'secret' not in session:
+    #     return redirect(url_for("split"))
+    print session
     access_token = sObj.getAccessToken(oauth_token,session['secret'],oauth_verifier)
     session['access_token'] = access_token
     return redirect('/with_friends')
@@ -177,12 +176,12 @@ def usage():
             users.append(user1)
     expense.setUsers(users)
 
-    clarifai_descpt = {}
+    #clarifai_descpt = {}
 
     try:
         expense = sObj.createExpense(expense)
         print expense.getId()
-        return session
+        return 'success'
     except Exception, e:
         return 'error'
 
